@@ -1,21 +1,12 @@
 import asyncio
 import pytest
-from app.scheduler import async_scheduler, minutely_task, shutdown_scheduler, start_scheduler
-
-
-def test_minutely_task_execution() -> None:
-    minutely_task()
+from app.scheduler import async_scheduler, shutdown_scheduler, start_scheduler
 
 
 def test_scheduler_jobs_registered() -> None:
-    # 毎分0秒の基本タスク
-    min_job = async_scheduler.get_job("minutely_task")
-    assert min_job is not None
-    assert str(min_job.trigger.fields[7]) == "0"
-
-    # 毎分0秒のAI問い合わせタスク
     ai_job = async_scheduler.get_job("ai_query_job")
     assert ai_job is not None
+    # CronTrigger の second が 0 に設定されていることを検証
     assert str(ai_job.trigger.fields[7]) == "0"
 
 

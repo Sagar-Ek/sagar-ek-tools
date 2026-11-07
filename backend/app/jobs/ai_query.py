@@ -1,21 +1,47 @@
 import logging
+import os
 from datetime import datetime
 from typing import Optional
-import httpx
-from app.core.config import settings
+import litellm
+from litellm import acompletion
 
 logger = logging.getLogger("jobs.ai_query")
+
+# 不要なデバッグ出力を抑制
+litellm.suppress_debug_info = True
+
+# ==============================================================================
+# AIプロンプト設定（ここを直接編集してプロンプトを変更できます）
+# ==============================================================================
+SYSTEM_PROMPT = "You are a concise system assistant."
+
+DEFAULT_PROMPT = """
+現在時刻と稼働状態に関する一言メッセージを日本語で簡潔に返してください。
+""".strip()
+
+# デフォルトモデル（環境変数 AI_MODEL で上書き可能）
+DEFAULT_MODEL = "gemini/gemini-3.1-flash-lite"
+# ==============================================================================
+
+
+def normalize_model_name(model: str) -> str:
+    """LiteLLM 用にモデル名を整形（gemini-* でプレフィックス未指定の場合は gemini/ を付与）"""
+    if model.startswith("gemini") and "/" not in model:
+        return f"gemini/{model}"
+    return model
 
 
 async def query_ai(prompt: Optional[str] = None) -> str:
     """
-    AI API（OpenAI互換APIなど）に問い合わせを行う非同期関数。
-    AI_API_KEY が未設定の場合はログ出力の上モック応答を返します。
+    LiteLLM を利用して AI（Gemini, OpenAI, Anthropic 等）に問い合わせを行う非同期関数。
+    .env の AI_API_KEY が未設定の場合はログ出力の上モック応答を返します。
     """
-    target_prompt = prompt or settings.AI_PROMPT
+    target_prompt = prompt or DEFAULT_PROMPT
     timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
-    if not settings.AI_API_KEY:
+    # .env から直接取得（config.py を介さない方式）
+    api_key = os.getenv("AI_API_KEY")
+    if not api_key:
         mock_response = (
             f"[MOCK AI] ({timestamp}) AI_API_KEYが未設定のためシミュレーション実行しました: "
             f"システムは正常に稼働しています。"
@@ -23,44 +49,26 @@ async def query_ai(prompt: Optional[str] = None) -> str:
         logger.info(mock_response)
         return mock_response
 
-    headers = {
-        "Authorization": f"Bearer {settings.AI_API_KEY}",
-        "Content-Type": "application/json",
-    }
-    payload = {
-        "model": settings.AI_MODEL,
-        "messages": [
-            {"role": "system", "content": "You are a concise system assistant."},
-            {"role": "user", "content": target_prompt},
-        ],
-        "temperature": 0.7,
-        "max_tokens": 150,
-    }
+    raw_model = os.getenv("AI_MODEL", DEFAULT_MODEL)
+    model = normalize_model_name(raw_model)
+    messages = [
+        {"role": "system", "content": SYSTEM_PROMPT},
+        {"role": "user", "content": target_prompt},
+    ]
 
     try:
-        async with httpx.AsyncClient(timeout=30.0) as client:
-            response = await client.post(
-                settings.AI_API_URL,
-                headers=headers,
-                json=payload,
-            )
-            response.raise_for_status()
-            data = response.json()
-            message = data["choices"][0]["message"]["content"].strip()
-            logger.info("AI 応答を受信しました (%s): %s", timestamp, message)
-            return message
-    except httpx.HTTPStatusError as exc:
-        logger.error(
-            "AI API HTTPエラー (ステータス %s): %s",
-            exc.response.status_code,
-            exc.response.text,
+        response = await acompletion(
+            model=model,
+            messages=messages,
+            api_key=api_key,
+            temperature=0.7,
+            max_tokens=150,
         )
-        raise
-    except httpx.RequestError as exc:
-        logger.error("AI API 接続エラー: %s", exc)
-        raise
+        message = response.choices[0].message.content.strip()
+        logger.info("AI 応答を受信しました (%s): %s", timestamp, message)
+        return message
     except Exception as exc:
-        logger.error("AI 問い合わせ中に予期せぬエラーが発生しました: %s", exc)
+        logger.error("LiteLLM 問い合わせ中にエラーが発生しました: %s", exc)
         raise
 
 

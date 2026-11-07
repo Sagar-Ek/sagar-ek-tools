@@ -24,6 +24,8 @@ services:
       context: ./backend
       dockerfile: Dockerfile
     container_name: sagar-backend
+    env_file:
+      - .env
     restart: unless-stopped
     ports:
       - "${BACKEND_PORT:-8000}:8000"
