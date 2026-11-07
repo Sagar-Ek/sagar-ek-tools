@@ -19,5 +19,11 @@ class Settings(BaseSettings):
     ENVIRONMENT: str = "development"
     DATABASE_URL: str = "postgresql://postgres:postgres@localhost:5432/sagar_ek_tools"
 
+    # AI 問い合わせ設定
+    AI_API_KEY: str = ""
+    AI_API_URL: str = "https://api.openai.com/v1/chat/completions"
+    AI_MODEL: str = "gpt-4o-mini"
+    AI_PROMPT: str = "現在時刻と稼働状態に関する一言メッセージを日本語で簡潔に返してください。"
+
 
 settings = Settings()
