@@ -43,7 +43,6 @@ dist/
 venv/
 env/
 ENV/
-backend/.venv/
 
 # Testing & Linters (pytest, coverage, mypy, ruff)
 .pytest_cache/
@@ -57,15 +56,12 @@ htmlcov/
 # Node.js / Next.js Frontend
 # ==========================================
 node_modules/
-frontend/node_modules/
 .pnp
 .pnp.js
 
 # Next.js Build Outputs
 .next/
-frontend/.next/
 out/
-frontend/out/
 
 # Logs
 npm-debug.log*
