@@ -1,0 +1,82 @@
+# ==========================================
+# Environment Variables & Secrets
+# ==========================================
+.env
+.env.*
+!../bk/.env.example
+*.env.local
+
+# ==========================================
+# Operating System Files
+# ==========================================
+.DS_Store
+.DS_Store?
+._*
+[Tt]humbs.db
+[Ee]hthumbs.db
+
+# ==========================================
+# IDE & Editor Files
+# ==========================================
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+*.sublime-workspace
+*.sublime-project
+
+# ==========================================
+# Python / FastAPI Backend
+# ==========================================
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+dist/
+*.egg-info/
+
+# Virtual Environments
+.venv/
+venv/
+env/
+ENV/
+backend/.venv/
+
+# Testing & Linters (pytest, coverage, mypy, ruff)
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+.mypy_cache/
+.ruff_cache/
+
+# ==========================================
+# Node.js / Next.js Frontend
+# ==========================================
+node_modules/
+frontend/node_modules/
+.pnp
+.pnp.js
+
+# Next.js Build Outputs
+.next/
+frontend/.next/
+out/
+frontend/out/
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+*.log
+
+# TypeScript Cache
+*.tsbuildinfo
+
+# Vercel
+.vercel
