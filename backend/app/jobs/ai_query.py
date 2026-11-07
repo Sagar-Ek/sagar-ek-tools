@@ -13,10 +13,16 @@ litellm.suppress_debug_info = True
 # ==============================================================================
 # AIプロンプト設定（ここを直接編集してプロンプトを変更できます）
 # ==============================================================================
-SYSTEM_PROMPT = "You are a concise system assistant."
-
+SYSTEM_PROMPT = "You are an algorithmic trader specializing in short-term cryptocurrency (BTCUSDT) trading."
 DEFAULT_PROMPT = """
-現在時刻と稼働状態に関する一言メッセージを日本語で簡潔に返してください。
+Analyze the current BTCUSDT liquidation heatmap and determine the recommended course of action.
+Provide your output exclusively in the following JSON format (you may use a Markdown code block, i.e., ```json ... ```, but do not include any additional commentary or greetings).
+{"entry": "", "long": "", "short": "", "reason": ""}
+*Rules for each field:
+entry: "Buy" or "Sell" if initiating a new position; otherwise, ""
+long: "Close" if closing an existing long position; otherwise, ""
+short: "Close" if closing an existing short position; otherwise, ""
+reason: Provide the rationale for your decision in Japanese.
 """.strip()
 
 # デフォルトモデル（環境変数 AI_MODEL で上書き可能）
